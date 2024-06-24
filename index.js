@@ -10,6 +10,8 @@ const customerRouter = require("./src/routes/customer");
 const appointmentRouter = require("./src/routes/appoinment");
 const reviewRouter = require("./src/routes/review_ratings");
 const path = require('path'); 
+const sendEmail = require('./src/emailServer'); 
+
 const app = express();
 
 app.use(cors());
@@ -22,6 +24,16 @@ app.use("/api/appointments", appointmentRouter);
 app.use("/api/reviews", reviewRouter);
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.post('/api/send-email', async (req, res) => {
+  const { to, subject, text } = req.body;
+
+  try {
+      await sendEmail({ to, subject, text });
+      res.status(200).send('Email sent successfully');
+  } catch (error) {
+      res.status(500).send('Failed to send email');
+  }
+});
 
 const port = 4005;
 

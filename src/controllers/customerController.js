@@ -38,7 +38,7 @@ exports.getAllCustomers = async (req, res) => {
 //get suppliers
 exports.fetchSuppliers = async (req, res) => {
     try {
-        const suppliers = await Customer.find({ role: 'supplier' });
+        const suppliers = await Customer.find({ role: 'supplier' }, 'name email'); // Fetch name and email
         res.json(suppliers);
     } catch (error) {
         res.status(500).json({ message: error.message });
