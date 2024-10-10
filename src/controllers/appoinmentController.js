@@ -56,48 +56,30 @@ exports.getAppointmentsByN_SDate = async (req, res) => {
 };
 
 
-//get appointmnet by date
+//get appointmnet by date// get appointments by date
 exports.getAppointmentsByDate = async (req, res) => {
-  try {
-    const { date } = req.query;
-    if (!date) {
-      return res.status(400).json({ error: 'Date query parameter is required' });
-    }
+    try {
+      const { date } = req.query;  // Expecting date in 'YYYY-MM-DD' format
+  
+      if (!date) {
+        return res.status(400).json({ error: 'Date query parameter is required' });
+      }
+  
+      // Query appointments where the date matches the provided date string exactly
+      const appointments = await Appointment.find({
+        date: date  // Match the date string directly
+      }).populate('customerId');  // Assuming customerId is the correct field to populate
+  
+      // Send the fetched appointments back as JSON
+      res.json({ appointments });
+  
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Server error');
+    }
+  };
+  
 
-    // seperate incoming date string in 'YYYY-MM-DD' format
-    const [year, month, day] = date.split('-').map(Number);
-
-    // Create a new Date object using the parsed components
-    const startDate = new Date(year, month - 1, day);
-    if (isNaN(startDate.getTime())) {
-      return res.status(400).json({ error: 'Invalid date format' });
-    }
-
-    // Format startDate to match 'MM/DD/YYYY' format stored in MongoDB
-    const formattedStartDate = `${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')}/${year}`;
-
-    // Calculate endDate as the next day
-    const endDate = new Date(startDate);
-    endDate.setDate(startDate.getDate() + 1);
-
-    console.log('Querying appointments from:', formattedStartDate, 'to', endDate.toLocaleDateString('en-US'));
-
-    // Query appointments using $gte (greater than or equal to) startDate and $lt (less than) endDate
-    const appointments = await Appointment.find({
-      date: {
-        $gte: formattedStartDate,
-        $lt: format(endDate, 'MM/dd/yyyy') // Ensure endDate is formatted correctly
-      }
-    }).populate('customerId'); // Assuming customerId is the correct field to populate
-
-    console.log('Appointments:', appointments);
-
-    res.json({ appointments });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Server error');
-  }
-};
 
 //up next s date
 exports.updateNextServiceDate = async (req, res) => {
